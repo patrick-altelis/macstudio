@@ -1,0 +1,3 @@
+c'est la dernière version de ma tentatice de nettoyage du fichier lorsqu'on garde tout, les langues, les classes sans filtrer les pages et les classes en amont 
+je pense que c'est mieux finalement de filtrer avec le script de scraping puis d'envoyer directement au modèle llm Claude car le résultat est top et c'est simple 
+je vais donc créer une page accessible depuis un navigateur 

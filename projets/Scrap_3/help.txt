@@ -1,0 +1,17 @@
+il faut lancer main.py depuis Scrap 3
+puis aller sur claude.ai modèle 3.5 Sonnet : mettre le prompt : 
+tu vas rédiger les sources d'un chatbot qui peut répondre à de nombreuses questions sur un hôtel. 
+Je vais te donner deux fichiers. Le premier contient de nombreuses informations sur un hôtel. Le second est le modèle que tu dois reproduire (le fichier avec l'extension md). 
+Attention c'est juste un exemple tu ne dois prendre aucune information se rapportant à l'hôtel présent dans le modèle mais respecter le plan thème et le format du modèle 
+pour écrire les sources du premier fichier. 
+Par ailleurs, tu dois me dire ce qui manque et à la fin me donner le nombre de caractères des sources que tu vas écrire.
+cop.col les sources de scraped_results.fr 
+Sonnet va créer les sources
+Puis on complète en exécutant le script de "booking_scraper.py"
+! il faut sans doute créer un nouveau chat dans claude car fichier trop gros ou aller dans chat gpt mini 01 pour finir
+prompt tout nul : 
+"ok je vais te donner des sources qui respectent un plan et une forme précise; 
+je vais te donner les informations qui manquent dans ces sources et qu'on doit ajouter 
+et enfin un grand nombre d'informations pour apporter celles qui manquent. Peux tu aussi me suggérer des informations intéressantes que tu vois dans celles-ci 
+et qu'il faudrait que l'on ajoute pour  être exhaustif sur cet hôtel ?  1. voici les sources : # Présentation de l'hôtel... " après mon met tous les fichiers
+bon ce prompt est vraiment à retravailler mais il est 3h du mat dimanche 22 septembre 

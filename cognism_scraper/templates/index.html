@@ -1,0 +1,139 @@
+{% extends 'layout.html' %}
+
+{% block title %}Cognism Scraper - Home{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Extract Professional Profiles from Cognism</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Upload Company List</h5>
+                        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="mb-4">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Select CSV or TXT file</label>
+                                <input type="file" class="form-control" id="file" name="file" accept=".csv,.txt" required>
+                                <div class="form-text">CSV should have a column named 'company' or the first column will be used.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" {% if is_scraping %}disabled{% endif %}>Upload & Process</button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Or Enter Companies Manually</h5>
+                        <form action="{{ url_for('manual_input') }}" method="post" class="mb-4">
+                            <div class="mb-3">
+                                <label for="companies" class="form-label">Enter companies (one per line)</label>
+                                <textarea class="form-control" id="companies" name="companies" rows="5" required {% if is_scraping %}disabled{% endif %}></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" {% if is_scraping %}disabled{% endif %}>Process Companies</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if is_scraping %}
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Scraping in Progress</h5>
+            </div>
+            <div class="card-body">
+                <p>Currently processing: <strong id="current-company">{{ progress.current_company }}</strong></p>
+                <div class="progress mb-3">
+                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         style="width: {{ (progress.current / progress.total * 100) if progress.total > 0 else 0 }}%"
+                         aria-valuenow="{{ progress.current }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="{{ progress.total }}">
+                        {{ progress.current }} / {{ progress.total }}
+                    </div>
+                </div>
+                <p id="status-text" class="mb-0">Status: <span class="badge bg-primary">{{ progress.status }}</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Extracted Data Summary</h5>
+                <span class="badge bg-light text-dark">{{ profile_count }} profiles extracted</span>
+            </div>
+            <div class="card-body">
+                {% if companies %}
+                <div class="row">
+                    {% for company in companies %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card company-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ company.name }}</h5>
+                                <p class="card-text">{{ company.profiles|length }} profiles extracted</p>
+                                <a href="{{ url_for('view_company', company_id=company.id) }}" class="btn btn-sm btn-primary">View Profiles</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-center">No data extracted yet. Upload a company list to start.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if is_scraping %}
+<script>
+    // Poll for status updates every 3 seconds
+    function updateStatus() {
+        fetch('/status')  // Use absolute path instead of url_for
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_scraping) {
+                    // Update progress bar
+                    const progress = data.progress;
+                    const percentage = progress.total > 0 ? (progress.current / progress.total * 100) : 0;
+                    
+                    document.getElementById('current-company').textContent = progress.current_company;
+                    document.getElementById('progress-bar').style.width = percentage + '%';
+                    document.getElementById('progress-bar').setAttribute('aria-valuenow', progress.current);
+                    document.getElementById('progress-bar').textContent = progress.current + ' / ' + progress.total;
+                    
+                    // Update status
+                    const statusElement = document.getElementById('status-text');
+                    statusElement.innerHTML = 'Status: <span class="badge bg-primary">' + progress.status + '</span>';
+                    
+                    // Schedule next update
+                    setTimeout(updateStatus, 3000);
+                } else {
+                    // Scraping completed, reload the page
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching status:', error);
+                setTimeout(updateStatus, 5000); // Retry after 5 seconds
+            });
+    }
+    
+    // Start polling
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStatus();
+    });
+</script>
+{% endif %}
+{% endblock %}

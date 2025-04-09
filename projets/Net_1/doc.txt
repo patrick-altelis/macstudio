@@ -1,0 +1,104 @@
+# Pipeline de nettoyage de texte basé sur LLM sans cache
+
+## Architecture du pipeline
+
+1. **Gestionnaire de flux** : Orchestre le passage du texte entre les différentes étapes.
+
+2. **Interfaces API** : Gèrent les communications avec les API de Gemini et Claude.
+
+3. **Modules de traitement** : Correspondent à chaque étape du nettoyage.
+
+4. **Système de logging** : Enregistre les opérations pour le débogage et l'optimisation.
+
+## Étapes du pipeline
+
+1. **Prétraitement et nettoyage HTML** (Gemini)
+   - Input : Texte brut avec HTML
+   - Processus : Extraction du texte, suppression des balises et des scripts
+   - Output : Texte pur
+
+2. **Détection de langue et filtrage** (Gemini)
+   - Input : Texte pur
+   - Processus : Identification de la langue, segmentation du texte français
+   - Output : Texte français confirmé
+
+3. **Nettoyage et normalisation** (Claude)
+   - Input : Texte français
+   - Processus : Correction orthographique, normalisation des formats
+   - Output : Texte normalisé
+
+4. **Élimination des doublons sémantiques** (Claude)
+   - Input : Texte normalisé
+   - Processus : Identification et suppression des contenus redondants
+   - Output : Texte sans doublons
+
+5. **Structuration du contenu** (Claude)
+   - Input : Texte sans doublons
+   - Processus : Organisation thématique, création de sections cohérentes
+   - Output : Texte structuré final
+
+## Implémentation
+
+```python
+import asyncio
+from typing import List
+
+class LLMPipeline:
+    def __init__(self):
+        self.gemini_api = GeminiAPI()  # Hypothétique classe pour l'API Gemini
+        self.claude_api = ClaudeAPI()  # Hypothétique classe pour l'API Claude
+
+    async def process_text(self, raw_text: str) -> str:
+        text = await self.preprocess_and_clean_html(raw_text)
+        text = await self.detect_and_filter_language(text)
+        text = await self.clean_and_normalize(text)
+        text = await self.remove_semantic_duplicates(text)
+        text = await self.structure_content(text)
+        return text
+
+    async def preprocess_and_clean_html(self, text: str) -> str:
+        prompt = "Nettoie le HTML de ce texte et extrait le contenu textuel pur :"
+        return await self.gemini_api.process(prompt, text)
+
+    async def detect_and_filter_language(self, text: str) -> str:
+        prompt = "Identifie et extrait uniquement le contenu en français de ce texte :"
+        return await self.gemini_api.process(prompt, text)
+
+    async def clean_and_normalize(self, text: str) -> str:
+        prompt = "Nettoie et normalise ce texte français (correction orthographique, format standard) :"
+        return await self.claude_api.process(prompt, text)
+
+    async def remove_semantic_duplicates(self, text: str) -> str:
+        prompt = "Identifie et supprime les contenus sémantiquement redondants dans ce texte :"
+        return await self.claude_api.process(prompt, text)
+
+    async def structure_content(self, text: str) -> str:
+        prompt = "Organise ce texte en sections thématiques cohérentes :"
+        return await self.claude_api.process(prompt, text)
+
+async def main(texts: List[str]):
+    pipeline = LLMPipeline()
+    tasks = [pipeline.process_text(text) for text in texts]
+    results = await asyncio.gather(*tasks)
+    return results
+
+if __name__ == "__main__":
+    texts_to_process = ["<html>...", "Another text...", "Yet another..."]
+    processed_texts = asyncio.run(main(texts_to_process))
+    for i, text in enumerate(processed_texts):
+        print(f"Processed text {i+1}:\n{text}\n")
+```
+
+## Optimisations potentielles
+
+1. **Traitement parallèle** : Utiliser `asyncio` pour traiter plusieurs textes simultanément.
+2. **Gestion des erreurs** : Implémenter des mécanismes de retry et de fallback.
+3. **Paramètres ajustables** : Permettre la configuration des prompts et des seuils.
+4. **Monitoring en temps réel** : Ajouter des métriques pour suivre les performances.
+
+## Considérations
+
+- **Coût** : Surveiller l'utilisation des API pour optimiser les coûts.
+- **Limites de taille** : Gérer le découpage des très grands textes si nécessaire.
+- **Cohérence** : Assurer une transition fluide entre Gemini et Claude.
+- **Personnalisation** : Adapter les prompts en fonction des types de textes traités.

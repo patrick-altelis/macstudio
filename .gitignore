@@ -44,3 +44,9 @@ var/
 *.db
 *.sqlite
 *.sqlite3
+# Specific sensitive files
+projets/Archives/Net_1/Keys
+projets/Archives/Net_1/hotel_content_processor.py
+projets/data_general/data_support_claude/conversations.json
+projets/Archives/aText_cleaningv1/test\ clé/test.py
+projets/zzzBelambra/test_clé_api.py
